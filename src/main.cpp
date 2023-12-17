@@ -7,12 +7,15 @@
 #include "buttons.h"
 #include "pit.h"
 #include "ble.h"
+#include "pos.h"
 #define ONBOARD_LED 2
 
 volatile bool dot;
 
 const char *prefsNamespace = "PitTimer";
 const char *counterKey = "time";
+
+PitState pitstate = Unknown;
 
 //BleKeyboard bleKeyboard("Driftfun Race", "Driftfun", 100);
 uint8_t disp[5];
@@ -60,11 +63,22 @@ void loop() {
   readPitTimer(disp);
   show(disp);
   static int num = 0;
-  if (!(num++ % 100)){
-    if (isInPit()){
+  if (!(num++ % 100)) {
+    if (!hasValidPos()) {
+      Serial.println("Waiting for valid position.");
+      pitstate = Unknown;
+    } else if (isInPit()) {
+      if (pitstate == NotInThePits) {
+        pitIn();
+      }
+      pitstate = InThePits;
       Serial.println("IN PIT");
     } else {
       Serial.println("NOT IN PIT");
+      if (pitstate == InThePits) {
+        pitOut();
+      }
+      pitstate = NotInThePits;
     }
   }
   /*

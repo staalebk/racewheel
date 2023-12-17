@@ -31,7 +31,7 @@ bool isPointInPolygon(Point p, Point* polygon, int n) {
 bool isInPit() {
     Point p;
     getPos(&p.y, &p.x);
-    Serial.printf("pos: %.7f, %.5f\n", p.x, p.y);
+    Serial.printf("pos: %.7f, %.5f\n", p.y, p.x);
     if(isPointInPolygon(p, nbtrafikk, nbtrafikkSize))
         return true;
     if(isPointInPolygon(p, radarveien, radarveienSize))

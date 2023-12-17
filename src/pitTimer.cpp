@@ -129,3 +129,29 @@ void readPitTimer(uint8_t *disp) {
 void setupPitTimer() {
   readTimevalFromNVS();
 }
+
+void pitIn() {
+    struct timeval tv_now, tv_run;
+    gettimeofday(&tv_now, NULL);
+
+    // Calculate the run time
+    tv_run = timeval_subtract(tv_now, tv_begin);
+
+  //  if(tv_run.tv_sec > 60*4){
+        tv_begin = tv_now;
+        additional_time = 0;
+  //  }
+}
+
+void pitOut() {
+    struct timeval tv_now, tv_run;
+    gettimeofday(&tv_now, NULL);
+
+    // Calculate the run time
+    tv_run = timeval_subtract(tv_now, tv_begin);
+
+  //  if(tv_run.tv_sec > 60*4){
+        tv_begin = tv_now;
+        additional_time = 0;
+  //  }
+}

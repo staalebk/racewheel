@@ -48,13 +48,6 @@ class MyCallbacks2: public BLECharacteristicCallbacks {
                 v |= value[i*5+3] << 8;
                 v |= value[i*5+4] << 0;
                 monitorValues[mon] = v;
-                float test = (float)v/6000000;
-                Serial.println(test);
-                //memcpy(monitorValues + mon, value.data() + i*5 + 1, sizeof(int32_t));
-                for (int j = 0; j < 4; j++) {
-                    Serial.printf("%02X", value[i*5+1+j]);
-                }
-                Serial.printf("\nReceived for channel %d: %d\n", mon, monitorValues[mon]);
             }
         /*
         Serial.print("DATA: ");

@@ -18,7 +18,7 @@
 #define MONITORS_MAX 10
 
 #define DATA_LAT 1
-#define DATA_LONG 2
+#define DATA_LON 2
 
 int32_t getData(int data);
 void setupRCBle(char *name);
