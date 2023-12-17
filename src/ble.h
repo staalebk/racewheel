@@ -21,5 +21,5 @@
 #define DATA_LON 2
 
 int32_t getData(int data);
-void setupRCBle(char *name);
+void setupRCBle(const char *name);
 void pollRCBle();

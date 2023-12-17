@@ -6,7 +6,7 @@ This needs to be called often, at least once a second, preferably at least once 
 The main loop is a good place to call this
 */
 void pitTimerLoop();
-void setupPitTimer();
+int setupPitTimer();
 void readPitTimer(uint8_t *disp);
 void pitIn();
 void pitOut();

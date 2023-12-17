@@ -130,7 +130,7 @@ public:
   }
 };
 
-void setupRCBle(char *name) {
+void setupRCBle(const char *name) {
     uint8_t macaddr[6];
     BLEDevice::init(name);
     mainServer = BLEDevice::createServer();

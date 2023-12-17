@@ -1,8 +1,9 @@
 #include <Arduino.h>
 #include "seven_segment.h"
 
-hw_timer_t * timer = NULL;
+hw_timer_t * seven_segment_timer = NULL;
 volatile uint8_t display[5];
+int brightness = 0;
 
 
 void displayDigit(int digit, int dot) {
@@ -27,6 +28,10 @@ void IRAM_ATTR onTimer() {
   displayDigit(display[cur_disp%4], display[4]);
   // Enable display in the new slot
   digitalWrite(digits[cur_disp%4], HIGH);
+  if (brightness < 2) {
+    delayMicroseconds(brightness);
+    digitalWrite(digits[cur_disp%4], LOW);
+  }
 }
 
 void show(uint8_t *disp) {
@@ -55,8 +60,8 @@ void setupDisplay() {
   }
 
   /* Set up timer to cycle trough all digits */
-  timer = timerBegin(0, 80, true); // Timer 0, prescaler 80, count up
-  timerAttachInterrupt(timer, &onTimer, true);
-  timerAlarmWrite(timer, 10, true); // 10 ticks (0.01 ms), auto reload true
-  timerAlarmEnable(timer);
+  seven_segment_timer = timerBegin(0, 80, true); // Timer 0, prescaler 80, count up
+  timerAttachInterrupt(seven_segment_timer, &onTimer, true);
+  timerAlarmWrite(seven_segment_timer, 10, true); // 10 ticks (0.01 ms), auto reload true
+  timerAlarmEnable(seven_segment_timer);
 }

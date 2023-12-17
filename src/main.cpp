@@ -14,6 +14,7 @@ volatile bool dot;
 
 const char *prefsNamespace = "PitTimer";
 const char *counterKey = "time";
+const char RCBleName[] = "RC DIY #ABCD";
 
 PitState pitstate = Unknown;
 
@@ -21,6 +22,8 @@ PitState pitstate = Unknown;
 uint8_t disp[5];
 
 void setup() {
+  Serial.begin(115200);
+
   /* Set button as INPUT */
   pinMode(0, INPUT_PULLUP);
 
@@ -28,11 +31,11 @@ void setup() {
   pinMode(ONBOARD_LED, OUTPUT);
   digitalWrite(ONBOARD_LED, LOW);
   setupDisplay();
-  setupPitTimer();
-  Serial.begin(115200);
+  int offset = setupPitTimer();  
+  Serial.printf("Timer should start on %d secs\n", offset);
   Serial.println("Starting BLE work!");
   //bleKeyboard.begin();
-  setupRCBle("RC DIY #ABCD");
+  setupRCBle(RCBleName);
 }
 
 
@@ -72,9 +75,7 @@ void loop() {
         pitIn();
       }
       pitstate = InThePits;
-      Serial.println("IN PIT");
     } else {
-      Serial.println("NOT IN PIT");
       if (pitstate == InThePits) {
         pitOut();
       }

@@ -64,7 +64,7 @@ void pitTimerLoop() {
       tv_now.tv_sec += additional_time;
     }
     */
-
+    tv_now.tv_sec += additional_time;
     // Calculate the run time
     tv_run = timeval_subtract(tv_now, tv_begin);
 
@@ -126,14 +126,14 @@ void readPitTimer(uint8_t *disp) {
     memcpy(disp, pitTimer, 5);
 }
 
-void setupPitTimer() {
-  readTimevalFromNVS();
+int setupPitTimer() {
+  return readTimevalFromNVS().tv_sec;
 }
 
 void pitIn() {
     struct timeval tv_now, tv_run;
     gettimeofday(&tv_now, NULL);
-
+    Serial.println("PIT IN");
     // Calculate the run time
     tv_run = timeval_subtract(tv_now, tv_begin);
 
@@ -146,7 +146,7 @@ void pitIn() {
 void pitOut() {
     struct timeval tv_now, tv_run;
     gettimeofday(&tv_now, NULL);
-
+    Serial.println("PIT OUT");
     // Calculate the run time
     tv_run = timeval_subtract(tv_now, tv_begin);
 
