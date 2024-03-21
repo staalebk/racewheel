@@ -44,7 +44,7 @@ void show(uint8_t *disp) {
 }
 
 
-void setupDisplay() {
+void setupSevenSegmentDisplay() {
   /* Set all seven segment parts to output/high */
   for(int i = 0; i < ssp_len; i++) {
     digitalWrite(seven_segment_pins[i], HIGH);

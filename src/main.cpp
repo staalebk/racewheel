@@ -1,5 +1,15 @@
+#include "SPI.h"
+#include <esp_system.h>
+#include <esp_random.h>
+#include <FS.h>
+#include <Wire.h>
 #include <Arduino.h>
 #include <BleKeyboard.h>
+#include <TJpg_Decoder.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/event_groups.h"
+#include "SPIFFS.h"
 #include "driver/periph_ctrl.h"
 #include "config.h"
 #include "seven_segment.h"
@@ -8,7 +18,9 @@
 #include "pit.h"
 #include "ble.h"
 #include "pos.h"
-#define ONBOARD_LED 2
+#include "tftdisplay.h"
+#include "network.h"
+#define ONBOARD_LED 22
 
 volatile bool dot;
 
@@ -23,6 +35,8 @@ uint8_t disp[5];
 
 void setup() {
   Serial.begin(115200);
+  
+  setupTFT();
 
   /* Set button as INPUT */
   pinMode(0, INPUT_PULLUP);
@@ -30,12 +44,13 @@ void setup() {
   /* Configure onboard LED */
   pinMode(ONBOARD_LED, OUTPUT);
   digitalWrite(ONBOARD_LED, LOW);
-  setupDisplay();
+  //setupDisplay();
   int offset = setupPitTimer();  
   Serial.printf("Timer should start on %d secs\n", offset);
   Serial.println("Starting BLE work!");
   //bleKeyboard.begin();
   setupRCBle(RCBleName);
+  setupNetwork();
 }
 
 
@@ -61,6 +76,7 @@ void loop() {
       //bleKeyboard.release(KEY_MEDIA_PLAY_PAUSE);
    // }
   }
+  
   pitTimerLoop();
   pollRCBle();
   readPitTimer(disp);
