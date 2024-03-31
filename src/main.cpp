@@ -18,8 +18,11 @@
 #include "pit.h"
 #include "ble.h"
 #include "pos.h"
-#include "tftdisplay.h"
+//#include "tftdisplay.h"
+#include "amoled.h"
 #include "network.h"
+#include "pins_config.h"
+#include <Bounce2.h>
 #define ONBOARD_LED 22
 
 volatile bool dot;
@@ -32,29 +35,50 @@ PitState pitstate = Unknown;
 
 //BleKeyboard bleKeyboard("Driftfun Race", "Driftfun", 100);
 uint8_t disp[5];
-
+Bounce2::Button next = Bounce2::Button(); // next screen button
+Bounce2::Button prev = Bounce2::Button(); // next screen button
 void setup() {
   Serial.begin(115200);
   
-  setupTFT();
+  //setupTFT();
+  Serial.println("Starting...");
+  setupAmoled();
+  Serial.println("Displayinit done.");
 
   /* Set button as INPUT */
-  pinMode(0, INPUT_PULLUP);
+  //pinMode(0, INPUT_PULLUP);
 
   /* Configure onboard LED */
-  pinMode(ONBOARD_LED, OUTPUT);
-  digitalWrite(ONBOARD_LED, LOW);
+  //pinMode(ONBOARD_LED, OUTPUT);
+  //digitalWrite(ONBOARD_LED, LOW);
   //setupDisplay();
-  int offset = setupPitTimer();  
-  Serial.printf("Timer should start on %d secs\n", offset);
-  Serial.println("Starting BLE work!");
+  //int offset = setupPitTimer();  
+  //Serial.printf("Timer should start on %d secs\n", offset);
+  //Serial.println("Starting BLE work!");
   //bleKeyboard.begin();
-  setupRCBle(RCBleName);
-  setupNetwork();
+  //setupRCBle(RCBleName);
+  //setupNetwork();
+  next.attach(PIN_BUTTON_1, INPUT_PULLUP);
+  next.interval(5);
+  next.setPressedState(LOW);
+  prev.attach(PIN_BUTTON_2, INPUT_PULLUP);
+  prev.interval(5);
+  prev.setPressedState(LOW);
+
 }
 
 
 void loop() {
+  Serial.println("loopdeloop");
+  next.update();
+  prev.update();
+  if (next.pressed()) {
+    nextScreen();
+  }
+  if (prev.pressed()) {
+    prevScreen();
+  }
+#if 0
   if (isPushed(BUTTON_TOP_LEFT)) {
     Serial.println("LEFT");
  //   if(bleKeyboard.isConnected()) {
@@ -76,11 +100,11 @@ void loop() {
       //bleKeyboard.release(KEY_MEDIA_PLAY_PAUSE);
    // }
   }
-  
-  pitTimerLoop();
-  pollRCBle();
-  readPitTimer(disp);
-  show(disp);
+#endif
+  //pitTimerLoop();
+  //pollRCBle();
+  //readPitTimer(disp);
+  //show(disp);
   static int num = 0;
   if (!(num++ % 100)) {
     if (!hasValidPos()) {
@@ -104,5 +128,6 @@ void loop() {
       Serial.println(buttons[i]);
   }
   */
+  amoledLoop();
   delay(10);
 }
