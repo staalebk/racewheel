@@ -6,6 +6,7 @@
 #include "client.h"
 #include "../network_protocol.h"
 #include "../espnow.h"
+#include "canbus.h"
 
 // Define the MAC address of the receiver
 uint8_t broadcastAddress[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
@@ -122,6 +123,7 @@ void setup() {
     // get the status of Trasnmitted packet
     esp_now_register_send_cb(OnDataSent);
     esp_now_register_recv_cb(OnDataRecv);
+    setupCanbus();
 }
 
 void loop() {
@@ -130,13 +132,18 @@ void loop() {
     else
         digitalWrite(YELLOW_LED, LOW); 
     // Send message
-    delay(500); // Wait a bit before sending the next message
-    scan_for_channel();
-    send_pairing_request();
+    if(!locked) {
+        delay(500); // Wait a bit before sending the next message
+        scan_for_channel();
+        send_pairing_request();
+    }
+    pollCanbus();
+    /*
     if(locked)
         sleep(5);
     Serial.print("I'm on channel ");
     Serial.println(ESPNOW_channel);
+    */
     if(!locked)
         Serial.println(status);
 }
