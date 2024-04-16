@@ -127,6 +127,7 @@ void setup() {
 }
 
 void loop() {
+    locked = true;
     if(locked)
         digitalWrite(YELLOW_LED, HIGH);
     else

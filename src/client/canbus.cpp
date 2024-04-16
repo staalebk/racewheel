@@ -3,7 +3,9 @@
 #include "client.h"
 #include "canbus.h"
 
+#define SPAMRATE 1000
 void setupCanbus() {
+    Serial.println("Configuring Canbus");
     pinMode(CAN_RS, OUTPUT);    // INPUT (high impedance) = slope control mode, OUTPUT = see next line
     digitalWrite(CAN_RS, LOW);  // LOW = high speed mode, HIGH = low power mode (listen only)
     twai_general_config_t g_config = TWAI_GENERAL_CONFIG_DEFAULT((gpio_num_t)CAN_TX, (gpio_num_t)CAN_RX, TWAI_MODE_LISTEN_ONLY);
@@ -11,6 +13,7 @@ void setupCanbus() {
     twai_filter_config_t f_config  = TWAI_FILTER_CONFIG_ACCEPT_ALL();
     twai_driver_install(&g_config, &t_config, &f_config);
     twai_start();
+    Serial.println("Canbus configured");
 }
 
 void printCanMsg(twai_message_t *message) {
@@ -53,14 +56,14 @@ void decodeVSA(twai_message_t *message) {
     brake      = message->data[3] & 0b1000;
 
     // Check if less than 1000 milliseconds have passed since last print
-    if (currentTime - lastPrintTime < 1000) {
+    if (currentTime - lastPrintTime < SPAMRATE) {
         // It has not been a full second since the last print
         return;
     }
 
     // Update lastPrintTime with the current time after printing
     lastPrintTime = currentTime;
-
+/*
     Serial.print("Brake System Indicators: ");
     Serial.print(brake_system_indicators, HEX); // Printing in HEX as it's a bitmask
     Serial.print(", VSA Active: ");
@@ -71,6 +74,7 @@ void decodeVSA(twai_message_t *message) {
     Serial.print(abs ? "True" : "False");
     Serial.print(", Brake: ");
     Serial.println(brake ? "True" : "False"); // Use Serial.println() for the last part to add a newline
+    */
 }
 
 void decodeVSS(twai_message_t *message) {
@@ -93,20 +97,21 @@ void decodeVSS(twai_message_t *message) {
     odo = message->data[6];
 
     // Check if less than 1000 milliseconds have passed since last print
-    if (currentTime - lastPrintTime < 1000) {
+    if (currentTime - lastPrintTime < SPAMRATE) {
         // It has not been a full second since the last print
         return;
     }
 
     // Update lastPrintTime with the current time after printing
     lastPrintTime = currentTime;
-
+/*
     Serial.print("VSS1: ");
     Serial.print(vss1);
     Serial.print(", VSS2: ");
     Serial.print(vss1);
     Serial.print(", odo: ");
     Serial.println(odo);
+    */
 }
 
 void decodeRPM(twai_message_t *message) {
@@ -125,20 +130,34 @@ void decodeRPM(twai_message_t *message) {
     rpm |= message->data[5];
 
     // Check if less than 1000 milliseconds have passed since last print
-    if (currentTime - lastPrintTime < 1000) {
+    if (currentTime - lastPrintTime < SPAMRATE) {
         // It has not been a full second since the last print
         return;
     }
 
     // Update lastPrintTime with the current time after printing
     lastPrintTime = currentTime;
-
+/*
     Serial.print("maint: ");
     Serial.print(maint, HEX);
     Serial.print(", RPM: ");
     Serial.println(rpm);
+    */
 }
 
+void decodeSAS(twai_message_t *message) {
+    static unsigned long lastPrintTime = 0;
+    unsigned long currentTime = millis();
+    
+    int16_t angle;
+    if (message->data_length_code < 7)
+        return;
+
+    angle = (int16_t)((message->data[2] << 8) | message->data[3]);
+    
+    //Serial.println(angle);
+
+}
 void decodeECTRPMMIL(twai_message_t *message) {
     static unsigned long lastPrintTime = 0;
     unsigned long currentTime = millis();
@@ -158,25 +177,26 @@ void decodeECTRPMMIL(twai_message_t *message) {
     mil  = message->data[6];
 
     // Check if less than 1000 milliseconds have passed since last print
-    if (currentTime - lastPrintTime < 1000) {
+    if (currentTime - lastPrintTime < SPAMRATE) {
         // It has not been a full second since the last print
         return;
     }
 
     // Update lastPrintTime with the current time after printing
     lastPrintTime = currentTime;
-
+/*
     Serial.print("ECT: ");
     Serial.print(ect);
     Serial.print(", RPM: ");
     Serial.print(rpm);
     Serial.print(", MIL: ");
     Serial.println(mil, HEX);
+    */
 }
 
 void pollCanbus() {
     twai_message_t message;
-  
+    
     if (twai_receive(&message, pdMS_TO_TICKS(1)) == ESP_OK) {
         switch(message.identifier) {
             case CAN_ID_VSA:
@@ -191,8 +211,32 @@ void pollCanbus() {
             case CAN_ID_ECT_RPM_MIL:
                 decodeECTRPMMIL(&message);
                 break;
+            case CAN_ID_MYSTERY_1:
+                break;
+            case CAN_ID_MYSTERY_2:
+                break;
+            case CAN_ID_MYSTERY_3:
+                break;
+            case CAN_ID_MYSTERY_4:
+                break;
+            case CAN_ID_MYSTERY_5:
+                break;
+            case CAN_ID_MYSTERY_6:
+                break;
+            case CAN_ID_MYSTERY_7:
+                break;
+            case CAN_ID_MYSTERY_8:
+                decodeSAS(&message);
+                break;
+            case CAN_ID_MYSTERY_9:
+                break;
+            case CAN_ID_MYSTERY_10:
+                break;
+            case CAN_ID_MYSTERY_11:
+                break;
             default:
                 printCanMsg(&message);
+                break;
         }
     }
 }
